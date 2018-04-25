@@ -7,9 +7,10 @@
 
 #include<stdlib.h>
 #include<stdio.h>
-#include<glut.h>
+#include<GL/glut.h>
+#include <GL/freeglut_std.h>
 #include<math.h>
-#include <ctime>
+#include <time.h>
 
 /*Window height and width*/
 GLint WIDTH = 440, HIGHT = 480;
@@ -45,6 +46,9 @@ GLfloat wallcolors[][4] = {{0,0,1,1.0},{0,0,1,1.0},
 
 /*Snake Segment polygon indices*/
 GLubyte cubeIndices[] = {0,1,2,3};
+GLubyte cubeIndices1[] = {0,1,2};
+GLubyte cubeIndices2[] = {1,2,3};
+
 
 /*Complete 2D model indicies for boundry*/
 GLubyte wallIndices[] = {0,1,2,3, 2,4,5,6, 5,7,8,9, 8,3,10,11};
@@ -100,86 +104,133 @@ void myReshape(int x, int y){
 }
 
 /*Function displays polygons on to screen*/
-void display(){
+GLvoid display(){
 	int i;
 	char* buf;
 	int m = 10;
+    printf("In Display:\n");
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode( GL_FRONT, GL_FILL );
 	glPolygonMode( GL_BACK, GL_LINE );
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	
+
+    printf("Setup Done\n");
+
 	/*Main Menu*/
 	if (end == 1){
+        printf("end == 1\n");
 		glEnable(GL_TEXTURE_2D);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+
+        printf("Main Menu\n");
 		glColorPointer(4,GL_FLOAT, 0, colors2);
 		glVertexPointer(3, GL_FLOAT, 0, vert);		
 		glTexCoordPointer(2,GL_FLOAT, 0, tex); 
 
 		glPushMatrix();
+
+        printf("Not sure?\n");
 		glTranslated(220,250,0);
+        printf("Not sure1\n");
 		glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,iw,ih,0,GL_RGB,GL_UNSIGNED_BYTE, image);
-		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
+        printf("Not sure2\n");
+
+		//glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices1);
+        glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2i(0,   0);
+            glTexCoord2i(0, 1); glVertex2i(0,   ih);
+            glTexCoord2i(1, 1); glVertex2i(iw, ih);
+            glTexCoord2i(1, 0); glVertex2i(iw, 0);
+        glEnd();
+        printf("Not sure3\n");
 		glPopMatrix();
 
+        printf("Draw Play buttons?\n");
 		glVertexPointer(3, GL_FLOAT, 0, button);
 		glPushMatrix();
 		glTranslated(220,90,1);
 		if(opt > 0)	glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,jiw,jih,0,GL_RGB,GL_UNSIGNED_BYTE, play2);
 		else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,jiw,jih,0,GL_RGB,GL_UNSIGNED_BYTE, play);
-		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
+		//glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
+        glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2i(0,   0);
+            glTexCoord2i(0, 1); glVertex2i(0,   jih);
+            glTexCoord2i(1, 1); glVertex2i(jiw, jih);
+            glTexCoord2i(1, 0); glVertex2i(jiw, 0);
+        glEnd();
 		glPopMatrix();
 
+        printf("Draw Quit buttons?\n");
 		glPushMatrix();
 		glTranslated(220,60,1);
 		if (opt < 0) glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,jiw,jih,0,GL_RGB,GL_UNSIGNED_BYTE, quit2);
 		else glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,jiw,jih,0,GL_RGB,GL_UNSIGNED_BYTE, quit);
-		glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
+        glBegin(GL_QUADS);
+            glTexCoord2i(0, 0); glVertex2i(0,   0);
+            glTexCoord2i(0, 1); glVertex2i(0,   jih);
+            glTexCoord2i(1, 1); glVertex2i(jiw, jih);
+            glTexCoord2i(1, 0); glVertex2i(jiw, 0);
+        glEnd();
 		glPopMatrix();
 
+        printf("Disable!!?\n");
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisable(GL_TEXTURE_2D);
+
+        printf("Menu Done!!\n");
 	}
-	
+
+
+    printf("Set Snake attributes\n");
 	/*Set Snake attributes*/
 	glColorPointer(4,GL_FLOAT, 0, colors);
 	glVertexPointer(3, GL_FLOAT, 0, vertices);
-	
+
+    // Fails in this Block :(
+    // Probably do to DrawWlements
+    printf("Draw Snake\n");
 	/*Draw Snake*/
 	for(i = 0; i < seg; i++){
-	glPushMatrix();
-	glTranslated(pos[i][0],pos[i][1],0);
-	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
-	glPopMatrix();
-	} 
+        glPushMatrix();
+        glTranslated(pos[i][0],pos[i][1],0);
+        glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
+        glPopMatrix();
+	}
 
+    printf("Draw Food\n");
 	/*Draw Food*/
 	glColorPointer(4,GL_FLOAT, 0, foodcolors);
 	glPushMatrix();
 	glTranslated(food[0],food[1],0);
 	glDrawElements(GL_QUADS, 4, GL_UNSIGNED_BYTE, cubeIndices);
 	glPopMatrix();
-	
+
+    printf("Draw boundry walls\n");
 	/*Draw boundry walls*/
 	glVertexPointer(3, GL_FLOAT, 0, wallvert);
 	glColorPointer(4,GL_FLOAT, 0, wallcolors);
 	glDrawElements(GL_QUADS, 20, GL_UNSIGNED_BYTE, cubeIndices);
 
+    printf("Display Score\n");
 	/*Display Score*/
 	sprintf(turnstr,"Score: %d", score);
 
+    printf("LOOOP\n");
 	for (buf=turnstr; *buf != '\0'; buf++){
 		glRasterPos2f(m,-30);
     	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *buf);
 		m = m + glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24,*buf) + 3;
 	}
 
+    printf("Flush I/O\n");
 	/*Flush I/O and Using duel display buffer support*/
 	glFlush(); 
 	glutSwapBuffers();
+    printf("Display DONE!!\n");
 }
 
 /*Animation function controls locations of polygons between refreash*/
@@ -368,7 +419,7 @@ int main(int argc, char** argv){
 		printf("ERROR: Invalid Filename");
 	}
 	fscanf(fp,"%i %i %i",&iw,&ih, &maxV);
-	image = malloc(3*sizeof(GLuint)*(iw * ih));
+	image = (GLubyte *)malloc(3*sizeof(GLuint)*(iw * ih));
 	s=255./maxV;
 	
 	for(j=0;j<=(iw * ih);j++){
@@ -390,7 +441,7 @@ int main(int argc, char** argv){
 		printf("ERROR: Invalid Filename");
 	}
 	fscanf(fp,"%i %i %i",&jiw,&jih, &jmaxV);
-	play = malloc(3*sizeof(GLuint)*(jiw * jih));
+	play = (GLubyte *)malloc(3*sizeof(GLuint)*(jiw * jih));
 	s=255./jmaxV;
 	
 	for(j=0;j<=(jiw * jih);j++){
@@ -411,7 +462,7 @@ int main(int argc, char** argv){
 		printf("ERROR: Invalid Filename");
 	}
 	fscanf(fp,"%i %i %i",&jiw,&jih, &jmaxV);
-	play2 = malloc(3*sizeof(GLuint)*(jiw * jih));
+	play2 = (GLubyte *)malloc(3*sizeof(GLuint)*(jiw * jih));
 	s=255./jmaxV;
 	
 	for(j=0;j<=(jiw * jih);j++){
@@ -433,7 +484,7 @@ int main(int argc, char** argv){
 		printf("ERROR: Invalid Filename");
 	}
 	fscanf(fp,"%i %i %i",&jiw,&jih, &jmaxV);
-	quit = malloc(3*sizeof(GLuint)*(jiw * jih));
+	quit = (GLubyte *)malloc(3*sizeof(GLuint)*(jiw * jih));
 	s=255./jmaxV;
 	
 	for(j=0;j<=(jiw * jih);j++){
@@ -454,7 +505,7 @@ int main(int argc, char** argv){
 		printf("ERROR: Invalid Filename");
 	}
 	fscanf(fp,"%i %i %i",&jiw,&jih, &jmaxV);
-	quit2 = malloc(3*sizeof(GLuint)*(jiw * jih));
+	quit2 = (GLubyte *)malloc(3*sizeof(GLuint)*(jiw * jih));
 	s=255./jmaxV;
 	
 	for(j=0;j<=(jiw * jih);j++){
@@ -495,7 +546,7 @@ int main(int argc, char** argv){
 	glutInitWindowSize(WIDTH,HIGHT);
 	glutCreateWindow("Jake The Snake");
 	glutReshapeFunc(myReshape);
-	glutDisplayFunc((void *) display);
+	glutDisplayFunc(&display);
 	glutTimerFunc(100,animate,n);
 	glutKeyboardFunc(myKey);
 	glutSpecialFunc(processSpecialKeys);
